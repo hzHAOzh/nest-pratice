@@ -2,9 +2,9 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
-export type UserDocument = User & 
+export type UserDocument = User &
   Document & {
-    comparePassword(candidatePassword: string):Promise<boolean>;
+    comparePassword(candidatePassword: string): Promise<boolean>;
   };
 
 @Schema({ timestamps: true })
@@ -32,7 +32,7 @@ export class User {
   isActive: boolean; // 账号是否激活
 
   @Prop()
-  password: string;
+  password?: string;
 
   // 用户个人信息
   @Prop()
@@ -110,13 +110,14 @@ UserSchema.pre('save', async function () {
   if (!this.isModified('password')) {
     return;
   }
+
   const salt = await bcrypt.genSalt(10);
-  if(this.password) {
+  if (this.password) {
     this.password = await bcrypt.hash(this.password, salt);
   }
 });
 
-// 登录时验证密码
+// 添加比较密码的方法
 UserSchema.methods.comparePassword = async function (
   candidatePassword: string,
 ) {
